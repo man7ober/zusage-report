@@ -28,9 +28,9 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
     full_date, day = '', ''
 
     if len(input_date) == 0:
-        full_date, day = dt.strftime("%d.%m.%Y"), dt.strftime("%d")
+        full_date = dt.strftime("%d.%m.%Y")
     else:
-        full_date, day = input_date, full_date.split('.')[0]
+        full_date = input_date
 
     file_path = dwnPath + f"\{full_date.replace('.', '-')}"
             
@@ -65,6 +65,7 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
                     session.findById("wnd[0]/usr/lbl[14,3]").setFocus()
                     session.findById("wnd[0]/usr/lbl[14,3]").caretPosition = 0
                     session.findById("wnd[0]").sendVKey(2)
+                    day = session.findById("wnd[0]/usr/lbl[1,20]").text.split('.')[0]
                     session.findById("wnd[0]/tbar[1]/btn[48]").press()
                     session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").select()
                     session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").setFocus()
