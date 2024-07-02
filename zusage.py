@@ -25,14 +25,17 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
 
     ######### Steps to execute tcode SM37  ############
     dt = datetime.datetime.now()
-    full_date, day = '', ''
 
+    # define current date
+    zusage_date = ''
+
+    # if user input is given else todays date will be taken 
     if len(input_date) == 0:
-        full_date = dt.strftime("%d.%m.%Y")
+        zusage_date = dt.strftime("%d.%m.%Y")
     else:
-        full_date = input_date
+        zusage_date = input_date
 
-    file_path = dwnPath + f"\{full_date.replace('.', '-')}"
+    file_path = dwnPath + f"\{zusage_date.replace('.', '-')}"
             
     # create folder
     if not os.path.exists(file_path):
@@ -45,14 +48,17 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
         try:
             session.findById("wnd[0]/usr/txtBTCH2170-JOBNAME").text = "ZU*"
             session.findById("wnd[0]/usr/txtBTCH2170-USERNAME").text = "CORE_BASIS2"
-            session.findById("wnd[0]/usr/ctxtBTCH2170-FROM_DATE").text = full_date
-            session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").text = full_date
+            session.findById("wnd[0]/usr/ctxtBTCH2170-FROM_DATE").text = zusage_date
+            session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").text = zusage_date
             session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").setFocus()
             session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").caretPosition = 10
             session.findById("wnd[0]/tbar[1]/btn[8]").press()
             session.findById("wnd[0]/usr/lbl[37,13]").setFocus()
             session.findById("wnd[0]/usr/lbl[37,13]").caretPosition = 0
             session.findById("wnd[0]").sendVKey(2)
+
+            # define report date
+            report_date, report_day = '', ''
 
             for i in range(3, 30):
                 file_size = session.findById(f"wnd[0]/usr/lbl[43,{i}]").text
@@ -65,13 +71,17 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
                     session.findById("wnd[0]/usr/lbl[14,3]").setFocus()
                     session.findById("wnd[0]/usr/lbl[14,3]").caretPosition = 0
                     session.findById("wnd[0]").sendVKey(2)
-                    day = session.findById("wnd[0]/usr/lbl[1,20]").text.split('.')[0]
+
+                    # if (len(report_date) != 0):
+                    #     report_date = session.findById("wnd[0]/usr/lbl[1,20]").text
+
+                    report_day = session.findById("wnd[0]/usr/lbl[1,20]").text.split('.')[0]
                     session.findById("wnd[0]/tbar[1]/btn[48]").press()
                     session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").select()
                     session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").setFocus()
                     session.findById("wnd[1]/tbar[0]/btn[0]").press()
                     session.findById("wnd[1]/usr/ctxtDY_PATH").text = file_path
-                    session.findById("wnd[1]/usr/ctxtDY_FILENAME").text = f"{file_name}_{day}.xls"
+                    session.findById("wnd[1]/usr/ctxtDY_FILENAME").text = f"{file_name}_{report_day}.xls"
                     session.findById("wnd[1]/usr/ctxtDY_FILENAME").caretPosition = 8
                     session.findById("wnd[1]/tbar[0]/btn[0]").press()
                     session.findById("wnd[0]/tbar[0]/btn[3]").press()
@@ -79,9 +89,9 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
 
             session.findById("wnd[0]/tbar[0]/okcd").text = "/nex"
             session.findById("wnd[0]").sendVKey(0)
-        
+
             # archiving file
-            zip_file_name = dwnPath + f'\ZUSAGE_{dt.strftime("%d")}_{dt.strftime("%b")}'
+            zip_file_name = dwnPath + f"\ZUSAGE_{dt.strftime('%d')}_{dt.strftime('%b')}"
             shutil.make_archive(
                 zip_file_name.upper(),
                 'zip',

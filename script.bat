@@ -1,1 +1,1 @@
-python C:\Users\003SC5744\zusage.py GRP 300 SPRT_BASIS2C Utcl@IBM25 C:\ANSIBLE\Ultratech\ZUSAGE
+python C:\Users\003SC5744\Desktop\zusage.py GRP 300 SPRT_BASIS2C Utcl@IBM25 C:\ANSIBLE\Ultratech\ZUSAGE
