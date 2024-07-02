@@ -58,9 +58,9 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
             session.findById("wnd[0]").sendVKey(2)
 
             # define report date
-            report_date, report_day = '', ''
+            report_date, report_day, report_month = '', '', ''
 
-            for i in range(3, 5):
+            for i in range(3, 30):
                 file_size = session.findById(f"wnd[0]/usr/lbl[43,{i}]").text
 
                 if (bool(file_size) == True):
@@ -90,10 +90,18 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
             session.findById("wnd[0]/tbar[0]/okcd").text = "/nex"
             session.findById("wnd[0]").sendVKey(0)
 
-            report_date = report_date.replace('.', '-')
+            report_date = report_date.split('.')
+
+            # extract month from report date
+            report_month = datetime.datetime(
+                int(report_date[2]),
+                int(report_date[1]),
+                int(report_date[0]),
+            )
 
             # archiving file
-            zip_file_name = dwnPath + f"\ZUSAGE_{report_date}"
+            zip_file_name = dwnPath + f"\ZUSAGE_{report_date[0]}_{report_month.strftime('%b')}"
+            
             shutil.make_archive(
                 zip_file_name.upper(),
                 'zip',
