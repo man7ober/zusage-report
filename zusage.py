@@ -60,7 +60,7 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
             # define report date
             report_date, report_day = '', ''
 
-            for i in range(3, 30):
+            for i in range(3, 5):
                 file_size = session.findById(f"wnd[0]/usr/lbl[43,{i}]").text
 
                 if (bool(file_size) == True):
@@ -72,8 +72,8 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
                     session.findById("wnd[0]/usr/lbl[14,3]").caretPosition = 0
                     session.findById("wnd[0]").sendVKey(2)
 
-                    # if (len(report_date) != 0):
-                    #     report_date = session.findById("wnd[0]/usr/lbl[1,20]").text
+                    if (len(report_date) == 0):
+                        report_date = session.findById("wnd[0]/usr/lbl[1,20]").text
 
                     report_day = session.findById("wnd[0]/usr/lbl[1,20]").text.split('.')[0]
                     session.findById("wnd[0]/tbar[1]/btn[48]").press()
@@ -90,8 +90,10 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
             session.findById("wnd[0]/tbar[0]/okcd").text = "/nex"
             session.findById("wnd[0]").sendVKey(0)
 
+            report_date = report_date.replace('.', '-')
+
             # archiving file
-            zip_file_name = dwnPath + f"\ZUSAGE_{dt.strftime('%d')}_{dt.strftime('%b')}"
+            zip_file_name = dwnPath + f"\ZUSAGE_{report_date}"
             shutil.make_archive(
                 zip_file_name.upper(),
                 'zip',
