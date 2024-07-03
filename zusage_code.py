@@ -46,8 +46,8 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
  
     if session.findById("wnd[0]/sbar").Text != "You are not authorized to use transaction SM37":
         try:
-            session.findById("wnd[0]/usr/txtBTCH2170-JOBNAME").text = "ZU*"
-            session.findById("wnd[0]/usr/txtBTCH2170-USERNAME").text = "CORE_BASIS2"
+            session.findById("wnd[0]/usr/txtBTCH2170-JOBNAME").text = "ZUSAGE DAILY PROGRAM"
+            session.findById("wnd[0]/usr/txtBTCH2170-USERNAME").text = "*"
             session.findById("wnd[0]/usr/ctxtBTCH2170-FROM_DATE").text = zusage_date
             session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").text = zusage_date
             session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").setFocus()
@@ -99,8 +99,10 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
                 int(report_date[0]),
             )
 
+            report_month = report_month.strftime('%b')
+
             # archiving file
-            zip_file_name = dwnPath + f"\ZUSAGE_{report_date[0]}_{report_month.strftime('%b')}"
+            zip_file_name = dwnPath + f"\ZUSAGE_{report_day}_{report_month}"
             
             shutil.make_archive(
                 zip_file_name.upper(),
