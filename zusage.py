@@ -1,6 +1,7 @@
 import win32com.client
 import sys
 import os
+import time
 import shutil
 import datetime
 
@@ -11,7 +12,9 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
 
     print("***** Please enter date on next input *****")
     print("***** For todays date press enter *****")
-    input_date = input("Enter Date ex: dd.mm.yyyy: ")
+    start_date = input("Enter start date ex: dd.mm.yyyy: ")
+    end_date = input("Enter end date ex: dd.mm.yyyy: ")
+    total_days = int(input("Enter total no of days: ") or 1)
     
     application = win32com.client.Dispatch("Sapgui.ScriptingCtrl.1")
     connection = application.Openconnection(sysID,True)
@@ -26,16 +29,12 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
     ######### Steps to execute tcode SM37  ############
     dt = datetime.datetime.now()
 
-    # define current date
-    zusage_date = ''
+    # if no user input todays date will be taken 
+    if len(start_date) == 0 and len(end_date) == 0:
+        start_date = dt.strftime("%d.%m.%Y")
+        end_date = dt.strftime("%d.%m.%Y")
 
-    # if user input is given else todays date will be taken 
-    if len(input_date) == 0:
-        zusage_date = dt.strftime("%d.%m.%Y")
-    else:
-        zusage_date = input_date
-
-    file_path = dwnPath + f"\{zusage_date.replace('.', '-')}"
+    file_path = dwnPath + f"\{start_date.replace('.', '-')}"
             
     # create folder
     if not os.path.exists(file_path):
@@ -48,70 +47,79 @@ def saplogin(sysID,clNo,usrID,pwRd, dwnPath):
         try:
             session.findById("wnd[0]/usr/txtBTCH2170-JOBNAME").text = "ZUSAGE DAILY PROGRAM"
             session.findById("wnd[0]/usr/txtBTCH2170-USERNAME").text = "*"
-            session.findById("wnd[0]/usr/ctxtBTCH2170-FROM_DATE").text = zusage_date
-            session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").text = zusage_date
+            session.findById("wnd[0]/usr/ctxtBTCH2170-FROM_DATE").text = start_date
+            session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").text = end_date
             session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").setFocus()
             session.findById("wnd[0]/usr/ctxtBTCH2170-TO_DATE").caretPosition = 10
             session.findById("wnd[0]/tbar[1]/btn[8]").press()
-            session.findById("wnd[0]/usr/lbl[37,13]").setFocus()
-            session.findById("wnd[0]/usr/lbl[37,13]").caretPosition = 0
-            session.findById("wnd[0]").sendVKey(2)
 
-            # define report date
-            report_date, report_day, report_month = '', '', ''
+            count = 1
+            value = 13
+            while (count <= total_days):
+                session.findById(f"wnd[0]/usr/lbl[37,{value}]").setFocus()
+                session.findById(f"wnd[0]/usr/lbl[37,{value}]").caretPosition = 0
+                session.findById("wnd[0]").sendVKey(2)
 
-            for i in range(3, 30):
-                file_size = session.findById(f"wnd[0]/usr/lbl[43,{i}]").text
+                # define report date
+                report_date, report_day, report_month = '', '', ''
 
-                if (bool(file_size) == True):
-                    session.findById(f"wnd[0]/usr/lbl[54,{i}]").setFocus()
-                    file_name = session.findById(f"wnd[0]/usr/lbl[54,{i}]").text
-                    session.findById(f"wnd[0]/usr/lbl[54,{i}]").caretPosition = 6
-                    session.findById("wnd[0]/tbar[1]/btn[34]").press()
-                    session.findById("wnd[0]/usr/lbl[14,3]").setFocus()
-                    session.findById("wnd[0]/usr/lbl[14,3]").caretPosition = 0
-                    session.findById("wnd[0]").sendVKey(2)
+                for i in range(3, 30):
+                    file_size = session.findById(f"wnd[0]/usr/lbl[43,{i}]").text
 
-                    if (len(report_date) == 0):
-                        report_date = session.findById("wnd[0]/usr/lbl[1,20]").text
+                    if (bool(file_size) == True):
+                        session.findById(f"wnd[0]/usr/lbl[54,{i}]").setFocus()
+                        file_name = session.findById(f"wnd[0]/usr/lbl[54,{i}]").text
+                        session.findById(f"wnd[0]/usr/lbl[54,{i}]").caretPosition = 6
+                        session.findById("wnd[0]/tbar[1]/btn[34]").press()
+                        session.findById("wnd[0]/usr/lbl[14,3]").setFocus()
+                        session.findById("wnd[0]/usr/lbl[14,3]").caretPosition = 0
+                        session.findById("wnd[0]").sendVKey(2)
 
-                    report_day = session.findById("wnd[0]/usr/lbl[1,20]").text.split('.')[0]
-                    session.findById("wnd[0]/tbar[1]/btn[48]").press()
-                    session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").select()
-                    session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").setFocus()
-                    session.findById("wnd[1]/tbar[0]/btn[0]").press()
-                    session.findById("wnd[1]/usr/ctxtDY_PATH").text = file_path
-                    session.findById("wnd[1]/usr/ctxtDY_FILENAME").text = f"{file_name}_{report_day}.xls"
-                    session.findById("wnd[1]/usr/ctxtDY_FILENAME").caretPosition = 8
-                    session.findById("wnd[1]/tbar[0]/btn[0]").press()
-                    session.findById("wnd[0]/tbar[0]/btn[3]").press()
-                    session.findById("wnd[0]/tbar[0]/btn[3]").press()
+                        if (len(report_date) == 0):
+                            report_date = session.findById("wnd[0]/usr/lbl[1,20]").text
+
+                        report_day = session.findById("wnd[0]/usr/lbl[1,20]").text.split('.')[0]
+                        session.findById("wnd[0]/tbar[1]/btn[48]").press()
+                        session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").select()
+                        session.findById("wnd[1]/usr/subSUBSCREEN_STEPLOOP:SAPLSPO5:0150/sub:SAPLSPO5:0150/radSPOPLI-SELFLAG[1,0]").setFocus()
+                        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+                        session.findById("wnd[1]/usr/ctxtDY_PATH").text = file_path
+                        session.findById("wnd[1]/usr/ctxtDY_FILENAME").text = f"{file_name}_{report_day}.xls"
+                        session.findById("wnd[1]/usr/ctxtDY_FILENAME").caretPosition = 8
+                        session.findById("wnd[1]/tbar[0]/btn[0]").press()
+                        session.findById("wnd[0]/tbar[0]/btn[3]").press()
+                        session.findById("wnd[0]/tbar[0]/btn[3]").press()
+
+                report_date = report_date.split('.')
+
+                # extract month from report date
+                report_month = datetime.datetime(
+                    int(report_date[2]),
+                    int(report_date[1]),
+                    int(report_date[0]),
+                )
+
+                report_month = report_month.strftime('%b')
+
+                # archiving file
+                zip_file_name = dwnPath + f"\ZUSAGE_{report_day}_{report_month}"
+                
+                shutil.make_archive(
+                    zip_file_name.upper(),
+                    'zip',
+                    file_path)
+            
+                # removing folder
+                if os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                
+                count += 1
+                value += 1
+
+                session.findById("wnd[0]/tbar[0]/btn[3]").press()
 
             session.findById("wnd[0]/tbar[0]/okcd").text = "/nex"
             session.findById("wnd[0]").sendVKey(0)
-
-            report_date = report_date.split('.')
-
-            # extract month from report date
-            report_month = datetime.datetime(
-                int(report_date[2]),
-                int(report_date[1]),
-                int(report_date[0]),
-            )
-
-            report_month = report_month.strftime('%b')
-
-            # archiving file
-            zip_file_name = dwnPath + f"\ZUSAGE_{report_day}_{report_month}"
-            
-            shutil.make_archive(
-                zip_file_name.upper(),
-                'zip',
-                file_path)
-        
-            # removing folder
-            if os.path.isdir(file_path):
-                shutil.rmtree(file_path)
             
             return "Successfully executed SM37 transaction code"
         except Exception as error:
